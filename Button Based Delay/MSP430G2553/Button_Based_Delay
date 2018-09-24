@@ -1,0 +1,63 @@
+//original code found online by TI-tutorial
+//used timer and button interrupt
+//Edited to complete tasks required by lab
+//Michael Sorce
+//Last updater 9/23/18
+
+//Includes MSP430 header file
+#include "msp430.h"
+
+void main(void)
+{
+  WDTCTL = WDTPW + WDTHOLD;     // Stop Watchdog Timer
+  CCTL0 = CCIE;                             // CCR0 interrupt enabled (used for timer)
+  TACTL = TASSEL_2 + MC_1 + ID_3;           //SMCLK, upmode, /8 --- initial set up for the clock being used and begins running it
+  CCR0 =  10000;                     // 12.5 Hz initial clock frequency
+  P1OUT &= 0x00;               // Shut down everything (Nothing output)
+  P1DIR &= 0x00;               // All Port1 pins set to input
+  P1DIR |= BIT0 + BIT6;            // P1.0 and P1.6 (LEDs) pins output the rest are input
+  P1REN |= BIT3;                   // Enable internal pull-up/down resistors
+  P1OUT |= BIT3;                   //Select pull-up mode for P1.3
+  P1IE |= BIT3;                       // P1.3 button interrupt enabled
+  P1IES |= BIT3;                     // P1.3 button Hi/lo edge
+  P1IFG &= ~BIT3;                  // P1.3 button IFG cleared (No interrupt pending)
+  _BIS_SR(CPUOFF + GIE);          // Enter LPM0 (Low power mode) w/ interrupt (SMClock and AClock still active)
+
+}
+
+// Timer A0 interrupt service routine
+#pragma vector=TIMER0_A0_VECTOR
+__interrupt void Timer_A0 (void)
+{
+   P1OUT ^= BIT0;                          // Toggle P1.0 (Green LED)
+}
+
+// Port 1 interrupt service routine (For Button press)
+#pragma vector=PORT1_VECTOR
+__interrupt void Port_1(void)
+{
+    P1OUT &= ~BIT0; //Turns off Green LED when button is pressed
+
+    //creates unsigned int count = 0
+    unsigned int count = 0;
+    //loop increases variable 'count' while button is held down
+    do
+    {
+        //limits count to max CCR0 (Slowest clock speed allowed)
+        if(count < 65534)
+        {
+           count++;
+        }
+
+    //While button is held down
+    }while(((P1IN & BIT3)!=BIT3));
+
+    //timer speed = count
+    CCR0 = count;
+
+    //reset count
+    count = 0;
+
+    // P1.3 IFG cleared - No interrupt pending
+    P1IFG &= ~BIT3;
+}
