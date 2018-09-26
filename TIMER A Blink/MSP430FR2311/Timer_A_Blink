@@ -1,4 +1,4 @@
-/* --COPYRIGHT--,BSD_EX
+ * --COPYRIGHT--,BSD_EX
  * Copyright (c) 2014, Texas Instruments Incorporated
  * All rights reserved.
  *
@@ -94,11 +94,11 @@ int main(void)
     PM5CTL0 &= ~LOCKLPM5;
 
     TB0CCTL0 |= CCIE;                            // TB0CCR0 interrupt enabled
-    TB0CCR0 = HzConverter(2.5, 8);                // CCR0 set to 50000 clock cycles
+    TB0CCR0 = HzConverter(2.5, 8, 1);                // CCR0 set to 50000 clock cycles
     TB0CTL |= TBSSEL__SMCLK | MC__UP | ID_3;     // SMCLK, UP mode, /8 clock speed
 
     TB1CCTL0 |= CCIE;                             // TB1CCR0 interrupt enabled
-    TB1CCR0 = HzConverter(20, 8);                 // CCR0 set to 10000 clock cycles
+    TB1CCR0 = HzConverter(20, 8, 1);                 // CCR0 set to 10000 clock cycles
     TB1CTL |= TBSSEL__SMCLK | MC__UP | ID_3;      // SMCLK, UP mode, /8 clock speed
 
     __bis_SR_register(LPM0_bits | GIE);           // Enter LPM3 w/ interrupts
