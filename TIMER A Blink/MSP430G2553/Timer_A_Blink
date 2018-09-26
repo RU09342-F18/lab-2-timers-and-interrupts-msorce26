@@ -70,7 +70,7 @@
 //Edited by Michael Sorce
 //Last updated 9/23/18
 
-//includes msp430 header file
+//includes msp430 header file and Hz_convert header file
 #include <msp430.h>
 #include "Hz_convert.h"
 
@@ -80,8 +80,8 @@ int main(void)
   P1DIR |= 0x41;                            // P1.0 and P1.6 output (LEDs)
   TA0CCTL0 = CCIE;                          // CCR0 interrupt enabled (interrupt used for timers) for TA0
   TA1CCTL0 = CCIE;                          // CCR0 interrupt enabled (interrupt used for timers) for TA1
-  TA0CCR0 = HzConverter(2.5, 8, 1);   // CCR0 set to 20000 clock cycles for Timer A0
-  TA1CCR0 = HzConverter(20, 8, 1);    // CCR0 set to 50000 clock cycles for Timer A1
+  TA0CCR0 = HzConverter(2.5, 8, 1);         // CCR0 set value that allows for LED blink at 2.5Hz, using /8 divider and SMCLK
+  TA1CCR0 = HzConverter(20, 8, 1);          // CCR0 set value that allows for LED blink at 20Hz, using /8 divider and SMCLK
 
   TA0CTL = TASSEL_2 + MC_1 + ID_3;          // SMCLK, upmode, /8 --- set up timer A0
 
