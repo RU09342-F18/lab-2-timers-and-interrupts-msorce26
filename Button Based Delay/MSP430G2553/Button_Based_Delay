@@ -9,19 +9,21 @@
 
 void main(void)
 {
-  WDTCTL = WDTPW + WDTHOLD;     // Stop Watchdog Timer
+  BCSCTL3 = LFXT1S_2;                       //Makes Aclk use internal oscillator
+  WDTCTL = WDTPW + WDTHOLD;                 // Stop Watchdog Timer
   CCTL0 = CCIE;                             // CCR0 interrupt enabled (used for timer)
-  TACTL = TASSEL_2 + MC_1 + ID_3;           //SMCLK, upmode, /8 --- initial set up for the clock being used and begins running it
-  CCR0 =  10000;                     // 12.5 Hz initial clock frequency
-  P1OUT &= 0x00;               // Shut down everything (Nothing output)
-  P1DIR &= 0x00;               // All Port1 pins set to input
-  P1DIR |= BIT0 + BIT6;            // P1.0 and P1.6 (LEDs) pins output the rest are input
-  P1REN |= BIT3;                   // Enable internal pull-up/down resistors
-  P1OUT |= BIT3;                   //Select pull-up mode for P1.3
-  P1IE |= BIT3;                       // P1.3 button interrupt enabled
-  P1IES |= BIT3;                     // P1.3 button Hi/lo edge
-  P1IFG &= ~BIT3;                  // P1.3 button IFG cleared (No interrupt pending)
-  _BIS_SR(CPUOFF + GIE);          // Enter LPM0 (Low power mode) w/ interrupt (SMClock and AClock still active)
+  TACTL = TASSEL_1 + MC_1 + ID_3;           //Aclk, cont, /8 --- initial set up for the clock being used and begins running it
+  CCR0 =  410;                              // 10 Hz initial clock frequency
+  P1OUT &= 0x00;                            // Shut down everything (Nothing output)
+  P1DIR &= 0x00;                            // All Port1 pins set to input
+  P1DIR |= BIT0 + BIT6;                     // P1.0 and P1.6 (LEDs) pins output the rest are input
+  P1REN |= BIT3;                            // Enable internal pull-up/down resistors
+  P1OUT |= BIT3;                            //Select pull-up mode for P1.3
+  P1IE |= BIT3;                             // P1.3 button interrupt enabled
+  P1IES |= BIT3;                            // P1.3 button Hi/lo edge
+  P1IFG &= ~BIT3;                           // P1.3 button IFG cleared (No interrupt pending)
+  _BIS_SR(GIE);                             // Enter LPM0 (Low power mode) w/ interrupt (SMClock and AClock still active)
+  while(1){};
 
 }
 
@@ -36,28 +38,22 @@ __interrupt void Timer_A0 (void)
 #pragma vector=PORT1_VECTOR
 __interrupt void Port_1(void)
 {
-    P1OUT &= ~BIT0; //Turns off Green LED when button is pressed
-
-    //creates unsigned int count = 0
-    unsigned int count = 0;
-    //loop increases variable 'count' while button is held down
-    do
+    //if button is depressed
+    if(P1IES & BIT3)
     {
-        //limits count to max CCR0 (Slowest clock speed allowed)
-        if(count < 65534)
-        {
-           count++;
-        }
+        P1OUT &= ~BIT0; //Turns off Green LED when button is pressed
+        TACTL = TACLR; //clears timer
+        TACTL = TASSEL_1 + MC_2 + ID_3; //starts timer, aclk, continuous mode, /8 divider
+        P1IES &= ~BIT3; //trigger interrupt when button released
+    }
+    else //if button is released
+    {
+        TACTL = MC_0;//timer stopped
+        CCR0 = TA0R;//ccr0 set to timers value
+        P1IES |= BIT3;//trigger interrupt when button pressed next
+        TACTL = TASSEL_1 + MC_1 + ID_3; //starts initial timer for button blink again
+    }
 
-    //While button is held down
-    }while(((P1IN & BIT3)!=BIT3));
-
-    //timer speed = count
-    CCR0 = count;
-
-    //reset count
-    count = 0;
-
-    // P1.3 IFG cleared - No interrupt pending
+    //clears interrupt pending
     P1IFG &= ~BIT3;
 }
