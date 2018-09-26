@@ -10,13 +10,27 @@
 //This performs an operation with the divider, CCR0, and operating frequency of the SMCLK (1MHz)
 //To get the timer to operate at the desired Hz
 
-int HzConverter(int Hz_val, int div)//accepts 2 int, desired frequency and divider being used
+int HzConverter(int Hz_val, int div, int clkinit)//accepts 2 int, desired frequency and divider being used
 {
-    //base frequency is 1Mhz for SMCLK
+    //base frequency is 1Mhz for SMCLK, 32kHz for Aclk
     //div = 1, 2, 4, 8
     int CCR0_val = 0;
 
-    CCR0_val = 1000000/(div * Hz_val);
+    //Preset 1 is SMCLK
+    //Preset 2 is ACLK
+
+    if(clkinit == 1)
+    {
+        CCR0_val = 1000000/(div * Hz_val);
+    }
+    else if(clkinit == 2)
+    {
+        CCR0_val = 32767/(div * Hz_val);
+    }
+    else
+    {
+        CCR0_val = clkinit/(div * Hz_val);
+    }
 
     return CCR0_val;
 }
