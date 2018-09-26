@@ -12,6 +12,7 @@
 #ifndef HZ_CONVERT_H_
 #define HZ_CONVERT_H_
 
-    int HzConverter(int Hz_val, int div);
+    int HzConverter(int Hz_val, int div, int clkinit);
 
 #endif /* HZ_CONVERT_H_ */
+
