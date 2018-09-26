@@ -69,13 +69,14 @@
 
 //Sample code by TI
 //Edited by Michael Sorce
-//Last updated 9/24/18
+//
 
 
 //Description: Code toggles 2 LEDs using Timer1_B0 and Timer0_B0 interrupt services at difference clock speeds
 
 //include msp430 header file
 #include <msp430.h>
+#include "Hz_convert.h"
 
 int main(void)
 {
@@ -93,11 +94,11 @@ int main(void)
     PM5CTL0 &= ~LOCKLPM5;
 
     TB0CCTL0 |= CCIE;                            // TB0CCR0 interrupt enabled
-    TB0CCR0 = 50000;                             // CCR0 set to 50000 clock cycles
+    TB0CCR0 = HzConverter(2.5, 8);                // CCR0 set to 50000 clock cycles
     TB0CTL |= TBSSEL__SMCLK | MC__UP | ID_3;     // SMCLK, UP mode, /8 clock speed
 
     TB1CCTL0 |= CCIE;                             // TB1CCR0 interrupt enabled
-    TB1CCR0 = 10000;                              // CCR0 set to 10000 clock cycles
+    TB1CCR0 = HzConverter(20, 8);                 // CCR0 set to 10000 clock cycles
     TB1CTL |= TBSSEL__SMCLK | MC__UP | ID_3;      // SMCLK, UP mode, /8 clock speed
 
     __bis_SR_register(LPM0_bits | GIE);           // Enter LPM3 w/ interrupts
