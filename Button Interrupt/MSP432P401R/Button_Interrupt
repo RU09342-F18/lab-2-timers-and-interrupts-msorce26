@@ -85,22 +85,24 @@ int main(void)
     //stops watchdog timer
     WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;
 
-    // Configuring P1.0 (LED) as output and P1.1 (Button) as input with pull-up resistor. Rest of pins are configured as output low.
+    // Configuring P1.0 (LED) as output and P1.1 (Button) as input with pull-up resistor
+    //Rest of pins are configured as output low
     P1->DIR = ~(uint8_t) BIT1;
-    P1->OUT = BIT1;
+    P1->OUT = BIT1;                         // P1 output register set to 0x02
     P1->REN = BIT1;                         // Enable pull-up resistor (P1.1 output high)
     
     P1->SEL0 = 0;                           //port1 set to GPIO
     P1->SEL1 = 0;                           //port1 set to GPIO
     
-    P1->IES = BIT1;                         // Interrupt on high-to-low transition
+    P1->IES = BIT1;                         // Button Interrupt on high-to-low transition
     P1->IFG = 0;                            // Clear all P1 interrupt flags
-    P1->IE = BIT1;                          // Enable interrupt for P1.1
+    P1->IE = BIT1;                          // Enable interrupt for P1.1 (Button)
 
     // Enable Port 1 interrupt on the NVIC
     NVIC->ISER[1] = 1 << ((PORT1_IRQn) & 31);
 
     // Terminate all remaining pins on the device
+    //All Port Directions turned to outputs, all outputing logic 0s
     P2->DIR |= 0xFF; P2->OUT = 0;
     P3->DIR |= 0xFF; P3->OUT = 0;
     P4->DIR |= 0xFF; P4->OUT = 0;
@@ -112,6 +114,7 @@ int main(void)
     P10->DIR |= 0xFF; P10->OUT = 0;
 
     // Configure Port J
+    //Direction of bit 0 - 3 set to output, all outputting logic 0
     PJ->DIR |= (BIT0| BIT1 | BIT2 | BIT3);
     PJ->OUT &= ~(BIT0 | BIT1 | BIT2 | BIT3);
 
@@ -130,7 +133,7 @@ int main(void)
     // Ensures SLEEPONEXIT takes effect immediately
     __DSB();
 
-    // Go to LPM4
+    // Go to LPM4 (Low power mode 4)
     __sleep();
 }
 
@@ -145,7 +148,7 @@ void PORT1_IRQHandler(void)
         P1->OUT ^= BIT0;
 
     // Delay for switch debounce
-    for(i = 0; i < 50000; i++)
+    for(i = 0; i < 20000; i++)
 
     //clears button interrupt
     P1->IFG &= ~BIT1;
