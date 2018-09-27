@@ -34,8 +34,8 @@
  *                       MSP430 CODE EXAMPLE DISCLAIMER
  *
  * MSP430 code examples are self-contained low-level programs that typically
- * demonstrate a single peripheral function or device feature in a highly
- * concise manner. For this the code may rely on the device's power-on default
+ * demonstrate /a single peripheral function or device feature in a highly
+ * concise manner/. For this the code may rely on the device's power-on default
  * register values and settings such as the clock configuration and care must
  * be taken when combining code from several examples to avoid potential side
  * effects. Also see www.ti.com/grace for a GUI- and www.ti.com/msp430ware
@@ -64,6 +64,12 @@
 //   April 2009
 //   Built with CCSv4 and IAR Embedded Workbench Version: 4.21
 //******************************************************************************
+
+//sample code by TI
+//Edited by Michael Sorce
+//last updated 9/26/18
+
+//includes msp430 header file
 #include <msp430.h>
 
 int main(void)
